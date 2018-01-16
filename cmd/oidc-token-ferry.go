@@ -2,15 +2,14 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
+	flags "github.com/jessevdk/go-flags"
 	"github.com/pkg/errors"
 	"github.com/twz123/oidc-token-ferry/pkg/oidc"
+	"github.com/twz123/oidc-token-ferry/pkg/render"
 )
 
 const (
@@ -19,53 +18,64 @@ const (
 	xCLIUsage
 )
 
-func main() {
-	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, syscall.SIGTERM, os.Interrupt)
-
-	code, msg := run(osSignals)
-	switch code {
-	case xOK:
-		return
-
-	case xCLIUsage:
-		fmt.Fprintln(os.Stderr, msg)
-		flag.Usage()
-
-	case xGeneralError:
-		fmt.Fprintln(os.Stderr, msg)
-	}
-
-	os.Exit(code)
+type renderOpts struct {
+	GoTemplate string `long:"go-template" description:"Go Template used to render credentials"`
 }
 
-func run(osSignals <-chan os.Signal) (int, string) {
-	var config oidc.Config
-	flag.StringVar(&config.IssuerURL, "issuer-url", "https://accounts.google.com", "")
-	flag.StringVar(&config.ClientID, "client-id", "", "")
-	flag.StringVar(&config.ClientSecret, "client-secret", "", "")
-	flag.Parse()
+type opts struct {
+	OIDCConfig oidc.Config `group:"OpenID Connect" namespace:"oidc"`
+	Rendering  renderOpts  `group:"Rendering" namespace:"render"`
+}
 
-	if config.IssuerURL == "" {
-		return xCLIUsage, "-issuer-url missing"
-	}
-	if config.ClientID == "" {
-		return xCLIUsage, "-client-id missing"
-	}
-	if config.ClientSecret == "" {
-		return xCLIUsage, "-client-secret missing"
-	}
-
-	credentials, err := performChallenge(&config)
+func main() {
+	opts, _, err := parseOpts()
 	if err != nil {
-		return xGeneralError, err.Error()
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			os.Exit(xOK)
+		} else {
+			os.Exit(xCLIUsage)
+		}
 	}
 
-	fmt.Println("IDToken: ", credentials.IDToken)
-	fmt.Println("RefreshToken: ", credentials.RefreshToken)
-	fmt.Println("EMail: ", credentials.EMail)
+	if err := run(opts); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(xGeneralError)
+	}
 
-	return xOK, ""
+	os.Exit(xOK)
+}
+
+func parseOpts() (*opts, []string, error) {
+	var opts opts
+	parser := flags.NewParser(&opts, flags.Default)
+	additionalArgs, err := parser.Parse()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &opts, additionalArgs, nil
+}
+
+func run(opts *opts) error {
+
+	var renderer render.Renderer
+	if opts.Rendering.GoTemplate == "" {
+		renderer = render.NewPlainRenderer()
+	} else {
+		var err error
+		renderer, err = render.NewTemplateRenderer(opts.Rendering.GoTemplate)
+		if err != nil {
+			return err
+		}
+	}
+
+	credentials, err := performChallenge(&opts.OIDCConfig)
+
+	if err != nil {
+		return err
+	}
+
+	return renderer.Render(os.Stdout, credentials)
 }
 
 func performChallenge(config *oidc.Config) (*oidc.Credentials, error) {

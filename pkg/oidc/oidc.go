@@ -11,7 +11,9 @@ import (
 )
 
 type Config struct {
-	IssuerURL, ClientID, ClientSecret string
+	IssuerURL    string `long:"issuer-url" description:"Issuer URL" default:"https://accounts.google.com"`
+	ClientID     string `long:"client-id" required:"yes" description:"Client ID to be used"`
+	ClientSecret string `long:"client-secret" required:"yes" description:"Client Secret to be used"`
 }
 
 type OIDCFlow struct {
@@ -19,6 +21,17 @@ type OIDCFlow struct {
 	oidcProvider *oidc.Provider
 	oidcVerifier *oidc.IDTokenVerifier
 	oauth2Config *oauth2.Config
+}
+
+type IDToken struct {
+	oidc.IDToken
+	Value  string
+	Claims map[string]interface{}
+}
+
+type Credentials struct {
+	IDToken      IDToken
+	RefreshToken string
 }
 
 func NewOpenIDConnectFlow(config *Config) (*OIDCFlow, error) {
@@ -92,27 +105,17 @@ func (challenge *OIDCChallenge) ExchangeCode(code string) (*Credentials, error) 
 		return nil, errors.Wrap(err, "failed to verify ID Token")
 	}
 
-	// Extract custom claims
-	var claims struct {
-		EMail         string `json:"email"`
-		EMailVerified bool   `json:"email_verified"`
-	}
+	var claims map[string]interface{}
+	idToken.Claims(claims)
 
 	if err := idToken.Claims(&claims); err != nil {
 		return nil, errors.Wrap(err, "failed to parse claims")
 	}
 
 	return &Credentials{
-		IDToken:      rawIDToken,
+		IDToken:      IDToken{*idToken, rawIDToken, claims},
 		RefreshToken: oauth2Token.RefreshToken,
-		EMail:        claims.EMail,
 	}, nil
-}
-
-type Credentials struct {
-	IDToken      string
-	RefreshToken string
-	EMail        string
 }
 
 func generateRandomState() (string, error) {

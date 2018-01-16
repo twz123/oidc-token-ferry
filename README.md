@@ -11,19 +11,24 @@ solves this problem, but specifically for Google as an Issuer.
 
 ## Usage
 
-    Usage of ./oidc-token-ferry:
-      -client-id string
+    Usage:
+    oidc-token-ferry [OPTIONS]
 
-      -client-secret string
+    OpenID Connect:
+        --oidc.issuer-url=    Issuer URL (default: https://accounts.google.com)
+        --oidc.client-id=     Client ID to be used
+        --oidc.client-secret= Client Secret to be used
 
-      -issuer-url string
-         (default "https://accounts.google.com")
+    Rendering:
+        --render.go-template= Go Template used to render credentials
+
+    Help Options:
+    -h, --help                Show this help message
 
 ## Building
 
 There's a `Makefile` that'll build a statically linked linux amd64 binary
-using Docker. But I'm pretty sure that `go build` / `go install` will also
-work.
+using Docker.
 
 ## License
 
