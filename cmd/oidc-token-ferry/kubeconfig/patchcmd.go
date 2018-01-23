@@ -77,11 +77,18 @@ func (cmd *patchCmd) Execute([]string) error {
 		if err != nil {
 			return err
 		}
-		_, err = os.Stdout.Write(content)
-		return err
+		if _, err := os.Stdout.Write(content); err != nil {
+			return errors.Wrap(err, "failed to write patched kubeconfig to STDOUT")
+		}
+
+		return nil
 	}
 
-	return clientcmd.WriteToFile(*config, outputPath)
+	if err := clientcmd.WriteToFile(*config, outputPath); err != nil {
+		return errors.Wrapf(err, "failed to write patched kubeconfig to %s", outputPath)
+	}
+
+	return nil
 }
 
 func loadClientConfig(kubeconfig string) (*clientcmdapi.Config, string, error) {
@@ -122,7 +129,7 @@ func loadClientConfig(kubeconfig string) (*clientcmdapi.Config, string, error) {
 		rules.ExplicitPath = kubeconfig
 		config, err := rules.Load()
 		if err != nil {
-			return nil, "", err
+			return nil, "", errors.Wrapf(err, "failed to read kubeconfig from %s", kubeconfig)
 		}
 
 		return config, kubeconfig, nil

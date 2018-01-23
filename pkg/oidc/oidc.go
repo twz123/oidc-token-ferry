@@ -11,7 +11,7 @@ import (
 )
 
 type Config struct {
-	IssuerURL    string `long:"issuer-url" description:"Issuer URL" default:"https://accounts.google.com"`
+	IssuerURL    string `long:"issuer-url" description:"IdP Issuer URL to be contacted" default:"https://accounts.google.com"`
 	ClientID     string `long:"client-id" required:"yes" description:"Client ID to be used"`
 	ClientSecret string `long:"client-secret" required:"yes" description:"Client Secret to be used"`
 }

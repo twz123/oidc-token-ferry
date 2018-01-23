@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -13,6 +15,7 @@ import (
 
 type tokenFerryCmd struct {
 	OIDCConfig oidc.Config `group:"OpenID Connect Options"`
+	NoOpenURL  bool        `long:"no-open-url" description:"Don't open the redirect URL in a browser automatically"`
 }
 
 func (cmd *tokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
@@ -26,16 +29,18 @@ func (cmd *tokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
 		return nil, errors.Wrapf(err, "failed to initiate OpenID Connect challenge")
 	}
 
-	fmt.Fprintln(os.Stderr, "Open URL: ", challenge.RedirectURL())
+	if err := cmd.notifyUserAboutRedirectURL(challenge.RedirectURL()); err != nil {
+		return nil, errors.Wrap(err, "failed to notify user about redirect URL")
+	}
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Fprint(os.Stderr, "Enter the code: ")
-	code, _ := reader.ReadString('\n')
-	code = strings.TrimSpace(code)
+	code, err := obtainCodeFromUser()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to obtain code")
+	}
 
 	credentials, err := challenge.ExchangeCode(code)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to exchange code for credentials")
 	}
 
 	return &api.TokenFerry{
@@ -43,4 +48,37 @@ func (cmd *tokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
 		ClientSecret: cmd.OIDCConfig.ClientSecret,
 		Creds:        credentials,
 	}, nil
+}
+
+func (cmd *tokenFerryCmd) notifyUserAboutRedirectURL(redirectURL string) error {
+	var openCmd *exec.Cmd
+	if !cmd.NoOpenURL {
+		switch os := runtime.GOOS; os {
+		case "darwin":
+			openCmd = exec.Command("open", redirectURL)
+		case "linux":
+			openCmd = exec.Command("xdg-open", redirectURL)
+		default:
+			// unsupported OS
+		}
+	}
+
+	if openCmd != nil {
+		if err := openCmd.Run(); err == nil {
+			return nil
+		}
+	}
+
+	_, err := fmt.Fprintln(os.Stderr, "Open the following URL and authenticate with the IdP: ", redirectURL)
+	return err
+}
+
+func obtainCodeFromUser() (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Fprint(os.Stderr, "Enter the code provided by the IdP: ")
+	code, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(code), nil
 }
