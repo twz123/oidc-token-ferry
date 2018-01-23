@@ -5,7 +5,7 @@ Performs an OpenID Connect Authentication Flow from the command line using an
 after the user has been authenticated. That code needs to be fed into this CLI.
 
 This little project has been inspired by [k8s-oidc-helper][koh], which also
-solves this problem, but specifically for Google as an Issuer.
+solves this problem, but specifically for Google as Identity Provider.
 
 [koh]: https://github.com/micahhausler/k8s-oidc-helper
 
@@ -15,7 +15,7 @@ solves this problem, but specifically for Google as an Issuer.
     oidc-token-ferry [OPTIONS] <patch-kubeconfig | render-go-template | render-json>
 
     OpenID Connect Options:
-        --issuer-url=    Issuer URL (default: https://accounts.google.com)
+        --issuer-url=    IdP Issuer URL to be contacted (default: https://accounts.google.com)
         --client-id=     Client ID to be used
         --client-secret= Client Secret to be used
 
@@ -46,8 +46,12 @@ solves this problem, but specifically for Google as an Issuer.
 
 ## Building
 
-There's a `Makefile` that'll build a statically linked linux amd64 binary
-using Docker.
+    go build ./cmd/oidc-token-ferry
+
+There's also a `Makefile` that'll build statically linked and compressed
+binaries for darwin/linux amd64 using Go 1.9.2 inside a Docker container:
+
+    make all
 
 ## License
 

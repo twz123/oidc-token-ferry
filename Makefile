@@ -1,29 +1,36 @@
-BUILD_DIR=/go/src/github.com/twz123/oidc-token-ferry
-BUILDER_IMAGE=docker.io/golang:1.9.2-alpine3.7
-
-DOCKER_IMAGE_NAME=quay.io/twz123/oidc-token-ferry
-DOCKER_IMAGE_TAG=$(shell git describe --tags --always --dirty)
+PROGRAM       = oidc-token-ferry
+GO_PACKAGE    = github.com/twz123/$(PROGRAM)
+BUILDER_IMAGE = docker.io/golang:1.9.2-alpine3.7
 
 # binaries
-DOCKER=docker
-DEP=dep
+DOCKER = docker
+GO     = go
+DEP    = dep
 
-oidc-token-ferry: Makefile Gopkg.lock $(shell find pkg/ cmd/ -type f -name \*.go -print)
-	$(DOCKER) run --rm -e CGO_ENABLED=0 -v "$(shell pwd -P):$(BUILD_DIR):ro" -w "$(BUILD_DIR)/cmd/oidc-token-ferry" $(BUILDER_IMAGE) \
-	go build -o /dev/stdout > oidc-token-ferry || { rm oidc-token-ferry; exit 1; }
-	chmod +x oidc-token-ferry
+OS_ARCH_PROGRAMS =
+PROGRAM_DEPENDENCIES = Makefile Gopkg.lock $(shell find pkg/ cmd/ -type f -name \*.go -print)
+
+$(PROGRAM): $(PROGRAM_DEPENDENCIES)
+	$(GO) build ./cmd/oidc-token-ferry
+
+define _os_arch_program =
+OS_ARCH_PROGRAMS += $(PROGRAM).$(1)-$(2)
+oidc-token-ferry.$(1)-$(2): $(PROGRAM_DEPENDENCIES)
+	$(DOCKER) run --rm -e GOOS=$(1) -e GOARCH=$(2) -e CGO_ENABLED=0 -v "$(shell pwd -P):/go/src/$(GO_PACKAGE):ro" -w "/go/src/$(GO_PACKAGE)/cmd/$(PROGRAM)" $(BUILDER_IMAGE) \
+	sh -c 'go build -ldflags="-s -w" -o /tmp/go.out && apk add --no-cache upx 1>&2 && upx -o /tmp/go.out.upx /tmp/go.out 1>&2 && cat /tmp/go.out.upx' > $(PROGRAM).$(1)-$(2) || { rm $(PROGRAM).$(1)-$(2); exit 1; }
+	chmod +x $(PROGRAM).$(1)-$(2)
+endef
+
+$(eval $(call _os_arch_program,linux,amd64))
+$(eval $(call _os_arch_program,darwin,amd64))
+
+.PHONY: all
+all: $(OS_ARCH_PROGRAMS)
 
 Gopkg.lock: Gopkg.toml $(shell find vendor/ -type f -name \*.go -print)
 	$(DEP) ensure
 	touch Gopkg.lock
 
+.PHONY: clean
 clean:
-	rm -f oidc-token-ferry
-
-.PHONY: dockerize
-dockerize: oidc-token-ferry Dockerfile
-	$(DOCKER) build . -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
-
-.PHONY: publish-docker-image
-publish-docker-image: dockerize
-	$(DOCKER) push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
+	rm -f $(PROGRAM) $(OS_ARCH_PROGRAMS)
