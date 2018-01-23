@@ -12,18 +12,37 @@ solves this problem, but specifically for Google as an Issuer.
 ## Usage
 
     Usage:
-    oidc-token-ferry [OPTIONS]
+    oidc-token-ferry [OPTIONS] <patch-kubeconfig | render-go-template | render-json>
 
-    OpenID Connect:
-        --oidc.issuer-url=    Issuer URL (default: https://accounts.google.com)
-        --oidc.client-id=     Client ID to be used
-        --oidc.client-secret= Client Secret to be used
-
-    Rendering:
-        --render.go-template= Go Template used to render credentials
+    OpenID Connect Options:
+        --issuer-url=    Issuer URL (default: https://accounts.google.com)
+        --client-id=     Client ID to be used
+        --client-secret= Client Secret to be used
 
     Help Options:
-    -h, --help                Show this help message
+    -h, --help           Show this help message
+
+    Available commands:
+    patch-kubeconfig    patches Kubernetes kubeconfig files
+    render-go-template  renders credentials using Go Templates
+    render-json         renders credentials as JSON
+
+    [patch-kubeconfig command options]
+            --user-name=       User name to use when generating client configuration. Either user-name or user-claim-name may be specified.
+            --user-claim-name= Claim that defines the user name to use when generating client configuration. Either user-name or user-claim-name may be specified.
+
+    [patch-kubeconfig command arguments]
+    KUBECONFIG_FILE:           Path to the kubeconfig file to be patched. Uses the default discovery mechanism if omitted/empty. Special value '-' (hyphen) means read from STDIN.
+    OUTPUT_FILE:               Path to the patched kubeconfig file to be written. Overwrites kubeconfig if omitted/empty. Special value '-' (hyphen) means write to STDOUT.
+
+    [render-go-template command options]
+        -o, --output-file=     Output file to write (defaults to STDOUT if omitted)
+
+    [render-go-template command arguments]
+    TEMPLATE_STRING:           Go Template to be rendered. An empty template indicates that the template is to be read from STDIN.
+
+    [render-json command options]
+        -o, --output-file= Output file to write (defaults to STDOUT if omitted)
 
 ## Building
 
