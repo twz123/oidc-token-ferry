@@ -14,6 +14,7 @@ type Config struct {
 	IssuerURL    string `long:"issuer-url" description:"IdP Issuer URL to be contacted" default:"https://accounts.google.com"`
 	ClientID     string `long:"client-id" required:"yes" description:"Client ID to be used"`
 	ClientSecret string `long:"client-secret" required:"yes" description:"Client Secret to be used"`
+	RedirectURL  string `long:"redirect-url" description:"Redirect URL to be communicated to the IdP (needs to indicate \"out of band\")" default:"urn:ietf:wg:oauth:2.0:oob"`
 }
 
 type OIDCFlow struct {
@@ -46,7 +47,7 @@ func NewOpenIDConnectFlow(config *Config) (*OIDCFlow, error) {
 	oauth2Config := &oauth2.Config{
 		ClientID:     config.ClientID,
 		ClientSecret: config.ClientSecret,
-		RedirectURL:  "urn:ietf:wg:oauth:2.0:oob",
+		RedirectURL:  config.RedirectURL,
 
 		// Discovery returns the OAuth2 endpoints.
 		Endpoint: provider.Endpoint(),

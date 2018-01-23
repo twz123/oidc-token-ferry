@@ -18,6 +18,7 @@ solves this problem, but specifically for Google as Identity Provider.
         --issuer-url=    IdP Issuer URL to be contacted (default: https://accounts.google.com)
         --client-id=     Client ID to be used
         --client-secret= Client Secret to be used
+        --redirect-url=  Redirect URL to be communicated to the IdP (needs to indicate "out of band") (default: urn:ietf:wg:oauth:2.0:oob)
 
     Help Options:
     -h, --help           Show this help message
