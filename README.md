@@ -15,10 +15,11 @@ solves this problem, but specifically for Google as Identity Provider.
     oidc-token-ferry [OPTIONS] <patch-kubeconfig | render-go-template | render-json>
 
     OpenID Connect Options:
-        --issuer-url=    IdP Issuer URL to be contacted (default: https://accounts.google.com)
-        --client-id=     Client ID to be used
-        --client-secret= Client Secret to be used
-        --redirect-url=  Redirect URL to be communicated to the IdP (needs to indicate "out of band") (default: urn:ietf:wg:oauth:2.0:oob)
+    -u, --issuer-url=    IdP Issuer URL to be contacted (default: https://accounts.google.com)
+    -i, --client-id=     Client ID to be used
+    -s, --client-secret= Client Secret to be used
+    -r, --redirect-url=  Redirect URL to be communicated to the IdP (needs to indicate "out of band") (default: urn:ietf:wg:oauth:2.0:oob)
+    -c, --claim=         Additional claims to be requested
 
     Help Options:
     -h, --help           Show this help message

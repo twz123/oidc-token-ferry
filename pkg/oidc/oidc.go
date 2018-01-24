@@ -11,10 +11,11 @@ import (
 )
 
 type Config struct {
-	IssuerURL    string `long:"issuer-url" description:"IdP Issuer URL to be contacted" default:"https://accounts.google.com"`
-	ClientID     string `long:"client-id" required:"yes" description:"Client ID to be used"`
-	ClientSecret string `long:"client-secret" required:"yes" description:"Client Secret to be used"`
-	RedirectURL  string `long:"redirect-url" description:"Redirect URL to be communicated to the IdP (needs to indicate \"out of band\")" default:"urn:ietf:wg:oauth:2.0:oob"`
+	IssuerURL    string   `short:"u" long:"issuer-url" description:"IdP Issuer URL to be contacted" default:"https://accounts.google.com"`
+	ClientID     string   `short:"i" long:"client-id" required:"yes" description:"Client ID to be used"`
+	ClientSecret string   `short:"s" long:"client-secret" required:"yes" description:"Client Secret to be used"`
+	RedirectURL  string   `short:"r" long:"redirect-url" description:"Redirect URL to be communicated to the IdP (needs to indicate \"out of band\")" default:"urn:ietf:wg:oauth:2.0:oob"`
+	Claims       []string `short:"c" long:"claim" description:"Additional claims to be requested"`
 }
 
 type OIDCFlow struct {
@@ -54,6 +55,10 @@ func NewOpenIDConnectFlow(config *Config) (*OIDCFlow, error) {
 
 		// "openid" is a required scope for OpenID Connect flows.
 		Scopes: []string{oidc.ScopeOpenID},
+	}
+
+	if config.Claims != nil {
+		oauth2Config.Scopes = append(oauth2Config.Scopes, config.Claims...)
 	}
 
 	verifier := provider.Verifier(&oidc.Config{ClientID: config.ClientID})
