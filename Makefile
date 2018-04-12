@@ -1,6 +1,6 @@
 PROGRAM       = oidc-token-ferry
 GO_PACKAGE    = github.com/twz123/$(PROGRAM)
-BUILDER_IMAGE = docker.io/golang:1.9.2-alpine3.7
+BUILDER_IMAGE = docker.io/golang:1.10.1-alpine3.7
 
 # binaries
 DOCKER = docker
@@ -23,6 +23,7 @@ endef
 
 $(eval $(call _os_arch_program,linux,amd64))
 $(eval $(call _os_arch_program,darwin,amd64))
+$(eval $(call _os_arch_program,windows,amd64))
 
 .PHONY: all
 all: $(OS_ARCH_PROGRAMS)
