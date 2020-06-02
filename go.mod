@@ -14,7 +14,7 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
-	github.com/jessevdk/go-flags v1.3.0
+	github.com/jessevdk/go-flags v1.4.0
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/juju/ratelimit v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
