@@ -1,6 +1,6 @@
 PROGRAM       = oidc-token-ferry
 GO_PACKAGE    = github.com/twz123/$(PROGRAM)
-BUILDER_IMAGE = docker.io/golang:1.10.1-alpine3.7
+BUILDER_IMAGE = docker.io/golang:1.14.4-alpine3.12
 
 # binaries
 DOCKER = docker
@@ -8,7 +8,7 @@ GO     = go
 DEP    = dep
 
 OS_ARCH_PROGRAMS =
-PROGRAM_DEPENDENCIES = Makefile Gopkg.lock $(shell find pkg/ cmd/ -type f -name \*.go -print)
+PROGRAM_DEPENDENCIES = Makefile go.mod go.sum $(shell find pkg/ cmd/ -type f -name \*.go -print)
 
 $(PROGRAM): $(PROGRAM_DEPENDENCIES)
 	$(GO) build ./cmd/oidc-token-ferry
@@ -27,10 +27,6 @@ $(eval $(call _os_arch_program,windows,amd64))
 
 .PHONY: all
 all: $(OS_ARCH_PROGRAMS)
-
-Gopkg.lock: Gopkg.toml $(shell find vendor/ -type f -name \*.go -print)
-	$(DEP) ensure
-	touch Gopkg.lock
 
 .PHONY: clean
 clean:
