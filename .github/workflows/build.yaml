@@ -1,0 +1,40 @@
+name: Build
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-18.04
+          go-os: linux
+        - os: macos-10.15
+          go-os: darwin
+        - os: windows-2019
+          go-os: windows
+          binary-suffix: .exe
+    env:
+      CGO_ENABLED: '0'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.14.4
+    - name: Build binary
+      run: go build -v -ldflags="-s -w" ./cmd/oidc-token-ferry
+    - name: Compress binary
+      uses: svenstaro/upx-action@v1-release
+      with:
+        file: oidc-token-ferry${{ matrix.binary-suffix }}
+        args: --best
+        strip: false
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: oidc-token-ferry_${{ matrix.go-os }}-amd64${{ matrix.binary-suffix }}
+        path: oidc-token-ferry${{ matrix.binary-suffix }}
