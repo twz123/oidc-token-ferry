@@ -11,25 +11,23 @@ import (
 	"github.com/twz123/oidc-token-ferry/pkg/cli"
 )
 
-type goTemplateCmd struct {
+type GoTemplateCmd struct {
 	cli.OutputTarget
 
 	Args struct {
 		TemplateString string `positional-arg-name:"TEMPLATE_STRING" description:"Go Template to be rendered. An empty template indicates that the template is to be read from STDIN."`
 	} `positional-args:"yes" required:"yes"`
 
-	cli cli.CLI
+	cli.TokenFerryCmd
 }
 
-func GoTemplateCmd(cli cli.CLI) interface{} { return &goTemplateCmd{cli: cli} }
-
-func (cmd *goTemplateCmd) Execute(args []string) error {
+func (cmd *GoTemplateCmd) Execute(args []string) error {
 	template, err := cmd.parseTemplate()
 	if err != nil {
 		return err
 	}
 
-	ferry, err := cmd.cli.PerformChallenge()
+	ferry, err := cmd.TokenFerryCmd.PerformChallenge()
 	if err != nil {
 		return err
 	}
@@ -39,7 +37,7 @@ func (cmd *goTemplateCmd) Execute(args []string) error {
 	})
 }
 
-func (cmd *goTemplateCmd) parseTemplate() (*template.Template, error) {
+func (cmd *GoTemplateCmd) parseTemplate() (*template.Template, error) {
 	if cmd.Args.TemplateString == "" {
 		return parseTemplateFromStdin()
 	}

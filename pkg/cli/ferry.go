@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"bufio"
@@ -13,12 +13,16 @@ import (
 	"github.com/twz123/oidc-token-ferry/pkg/oidc"
 )
 
-type tokenFerryCmd struct {
+type CLI interface {
+	PerformChallenge() (*api.TokenFerry, error)
+}
+
+type TokenFerryCmd struct {
 	OIDCConfig oidc.Config `group:"OpenID Connect Options"`
 	NoOpenURL  bool        `long:"no-open-url" description:"Don't open the redirect URL in a browser automatically"`
 }
 
-func (cmd *tokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
+func (cmd *TokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
 	flow, err := oidc.NewOpenIDConnectFlow(&cmd.OIDCConfig)
 	if err != nil {
 		return nil, err
@@ -50,7 +54,7 @@ func (cmd *tokenFerryCmd) PerformChallenge() (*api.TokenFerry, error) {
 	}, nil
 }
 
-func (cmd *tokenFerryCmd) notifyUserAboutRedirectURL(redirectURL string) error {
+func (cmd *TokenFerryCmd) notifyUserAboutRedirectURL(redirectURL string) error {
 	var openCmd *exec.Cmd
 	if !cmd.NoOpenURL {
 		switch os := runtime.GOOS; os {

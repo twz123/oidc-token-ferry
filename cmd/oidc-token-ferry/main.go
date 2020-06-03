@@ -7,6 +7,7 @@ import (
 
 	"github.com/twz123/oidc-token-ferry/cmd/oidc-token-ferry/kubeconfig"
 	"github.com/twz123/oidc-token-ferry/cmd/oidc-token-ferry/render"
+	"github.com/twz123/oidc-token-ferry/cmd/oidc-token-ferry/version"
 )
 
 const (
@@ -15,14 +16,15 @@ const (
 	xCLIUsage
 )
 
+type cli struct {
+	VersionCmd    version.VersionCmd   `command:"version" description:"Show oidc-token-ferry version information"`
+	JSONCmd       render.JSONCmd       `command:"render-json" description:"renders credentials as JSON"`
+	GoTemplateCmd render.GoTemplateCmd `command:"render-go-template" description:"renders credentials using Go Templates"`
+	PatchCmd      *kubeconfig.PatchCmd `command:"patch-kubeconfig" description:"patches Kubernetes kubeconfig files"`
+}
+
 func main() {
-	cli := &tokenFerryCmd{}
-
-	parser := flags.NewParser(cli, flags.Default)
-
-	cmd(parser, render.JsonCmd(cli), "render-json", "renders credentials as JSON")
-	cmd(parser, render.GoTemplateCmd(cli), "render-go-template", "renders credentials using Go Templates")
-	cmd(parser, kubeconfig.PatchCmd(cli), "patch-kubeconfig", "patches Kubernetes kubeconfig files")
+	parser := flags.NewParser(&cli{PatchCmd: kubeconfig.NewPatchCmd()}, flags.Default)
 
 	_, err := parser.Parse()
 	if err != nil {
@@ -38,10 +40,4 @@ func main() {
 	}
 
 	os.Exit(xOK)
-}
-
-func cmd(parser *flags.Parser, data interface{}, name, desc string) {
-	if _, err := parser.AddCommand(name, desc, "", data); err != nil {
-		panic(err)
-	}
 }

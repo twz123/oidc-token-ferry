@@ -8,15 +8,13 @@ import (
 	"github.com/twz123/oidc-token-ferry/pkg/cli"
 )
 
-type jsonCmd struct {
+type JSONCmd struct {
 	cli.OutputTarget
-	cli cli.CLI
+	cli.TokenFerryCmd
 }
 
-func JsonCmd(cli cli.CLI) interface{} { return &jsonCmd{cli: cli} }
-
-func (cmd *jsonCmd) Execute(args []string) error {
-	ferry, err := cmd.cli.PerformChallenge()
+func (cmd *JSONCmd) Execute(args []string) error {
+	ferry, err := cmd.TokenFerryCmd.PerformChallenge()
 	if err != nil {
 		return err
 	}

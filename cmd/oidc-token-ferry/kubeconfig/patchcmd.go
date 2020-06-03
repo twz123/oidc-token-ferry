@@ -16,7 +16,7 @@ import (
 
 const useStdInOut = "-"
 
-type patchCmd struct {
+type PatchCmd struct {
 	UserName      func(string) `long:"user-name" description:"User name to use when generating client configuration. Either user-name or user-claim-name may be specified."`
 	UserClaimName func(string) `long:"user-claim-name" description:"Claim that defines the user name to use when generating client configuration. Either user-name or user-claim-name may be specified."`
 
@@ -25,20 +25,20 @@ type patchCmd struct {
 		Outputconfig flags.Filename `positional-arg-name:"OUTPUT_FILE" description:"Path to the patched kubeconfig file to be written. Overwrites kubeconfig if omitted/empty. Special value '-' (hyphen) means write to STDOUT."`
 	} `positional-args:"yes"`
 
-	cli cli.CLI
+	cli.TokenFerryCmd
 
 	internalError     error
 	determineUserName func(*api.TokenFerry) (string, error)
 }
 
-func PatchCmd(cli cli.CLI) interface{} {
-	cmd := &patchCmd{cli: cli}
+func NewPatchCmd() *PatchCmd {
+	cmd := &PatchCmd{}
 	cmd.UserName = cmd.makeUserSelector(selectStaticUserName)
 	cmd.UserClaimName = cmd.makeUserSelector(selectUserNameFromClaim)
 	return cmd
 }
 
-func (cmd *patchCmd) Execute([]string) error {
+func (cmd *PatchCmd) Execute([]string) error {
 	if cmd.internalError != nil {
 		return cmd.internalError
 	}
@@ -55,7 +55,7 @@ func (cmd *patchCmd) Execute([]string) error {
 		return errors.Wrap(err, "failed to patch kubeconfig")
 	}
 
-	ferry, err := cmd.cli.PerformChallenge()
+	ferry, err := cmd.TokenFerryCmd.PerformChallenge()
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func loadClientConfig(kubeconfig string) (*clientcmdapi.Config, string, error) {
 	}
 }
 
-func (cmd *patchCmd) makeUserSelector(selector func(*api.TokenFerry, string) (string, error)) func(string) {
+func (cmd *PatchCmd) makeUserSelector(selector func(*api.TokenFerry, string) (string, error)) func(string) {
 	return func(value string) {
 		if cmd.determineUserName != nil {
 			cmd.internalError = errors.New("either user-name or user-claim-name may be specified")
