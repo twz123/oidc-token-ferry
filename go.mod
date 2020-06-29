@@ -16,5 +16,5 @@ require (
 	google.golang.org/appengine v1.6.6 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	k8s.io/client-go v0.18.4
+	k8s.io/client-go v0.18.5
 )
