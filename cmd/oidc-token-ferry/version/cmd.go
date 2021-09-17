@@ -15,10 +15,11 @@ type Version struct {
 
 func NewVersion() Version {
 	return Version{
-		Version:   VERSION,
-		GoVersion: runtime.Compiler,
-		GoOs:      runtime.GOOS,
-		GoArch:    runtime.GOARCH,
+		Version:    VERSION,
+		GoVersion:  runtime.Version(),
+		GoCompiler: runtime.Compiler,
+		GoOs:       runtime.GOOS,
+		GoArch:     runtime.GOARCH,
 	}
 }
 
