@@ -1,14 +1,11 @@
 version: 2
 updates:
-- package-ecosystem: gomod
-  directory: "/"
+- package-ecosystem: github-actions
+  directory: /
   schedule:
     interval: daily
-    time: "04:00"
+- package-ecosystem: gomod
+  directory: /
+  schedule:
+    interval: daily
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: k8s.io/client-go
-    versions:
-    - 0.20.2
-    - 0.20.3
-    - 0.20.5
