@@ -1,19 +1,21 @@
 name: Build
 # This workflow is triggered on pushes to the repository.
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build on ${{ matrix.go-os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - os: ubuntu-18.04
+        - os: ubuntu-20.04
           go-os: linux
-        - os: macos-10.15
+        - os:  macos-11
           go-os: darwin
-        - os: windows-2019
+        - os: windows-2022
           go-os: windows
           binary-suffix: .exe
     env:
@@ -26,7 +28,7 @@ jobs:
     - name: Setup go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.17.7
+        go-version: 1.18.1
     - name: Build binary
       run: make
     - name: Compress binary
