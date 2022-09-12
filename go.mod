@@ -3,7 +3,7 @@ module github.com/twz123/oidc-token-ferry
 go 1.18
 
 require (
-	github.com/coreos/go-oidc/v3 v3.3.0
+	github.com/coreos/go-oidc/v3 v3.4.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
