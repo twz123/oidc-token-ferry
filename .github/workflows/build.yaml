@@ -11,9 +11,9 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-20.04
+        - os: ubuntu-22.04
           go-os: linux
-        - os:  macos-11
+        - os:  macos-12
           go-os: darwin
         - os: windows-2022
           go-os: windows
@@ -28,7 +28,7 @@ jobs:
     - name: Setup go
       uses: actions/setup-go@v5
       with:
-        go-version: 1.18.1
+        go-version: 1.22.1
     - name: Build binary
       run: make
     - name: Compress binary
