@@ -1,6 +1,6 @@
 module github.com/twz123/oidc-token-ferry
 
-go 1.18
+go 1.22.0
 
 require (
 	github.com/coreos/go-oidc/v3 v3.9.0
