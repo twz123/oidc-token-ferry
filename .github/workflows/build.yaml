@@ -38,7 +38,8 @@ jobs:
       if: matrix.go-os != 'darwin'
       uses: svenstaro/upx-action@2.4.1
       with:
-        file: oidc-token-ferry${{ matrix.binary-suffix }}
+        files: |
+          oidc-token-ferry${{ matrix.binary-suffix }}
         args: --best
         strip: false
     - name: Upload binary
