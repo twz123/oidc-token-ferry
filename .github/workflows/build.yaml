@@ -13,9 +13,9 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-22.04
+        - os: ubuntu-24.04
           go-os: linux
-        - os:  macos-12
+        - os:  macos-14
           go-os: darwin
         - os: windows-2022
           go-os: windows
