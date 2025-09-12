@@ -6,7 +6,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.15.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/pkg/errors v0.9.1
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.31.0
 	k8s.io/client-go v0.34.1
 )
 
